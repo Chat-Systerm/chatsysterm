@@ -1,0 +1,48 @@
+<html>
+
+<head>
+    <title>chat UI</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="/stylesheets/client.css" rel="stylesheet">
+    <link href="/stylesheets/button.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<script>document.getElementsByTagName('body').height = window.innerHeight;</script>
+<body class="box">
+    <div class="container">
+        <h1 id="tishi"></h1>
+        <button class="sendbtn" onclick="logout()">退出聊天</button>
+        <div class="chatbox" id="chatbox">
+            <!--TODO:好友列表-->
+            <div class="chatleft">
+                <div class="top">
+                    <div class="select">
+                        <select id="myselect" onchange = "selefri()">
+                            <option>请选择聊天好友</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="center">
+                    <ul id="listul">
+                    </ul>
+                </div>
+            </div>
+            <div class="chatright" id = "1">
+                <div class="top">
+                    <span id="chattop1" class="spa"></span>
+                </div>
+                <div class="center">
+                    <ul class="ull" id="ulll1">
+                        <!--TODO:聊天记录通过增加Li标签-->
+                    </ul>
+                </div>
+                <div class="footer">
+                    <textarea class = "text" id="textx1" placeholder="请在此输入要发送的内容..."></textarea>
+                    <button class="sendbtn" id="sendbtn1" onclick="send_mess(1)">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript" src="/stylesheets/chat.js"></script>
