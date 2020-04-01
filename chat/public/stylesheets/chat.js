@@ -30,7 +30,7 @@ function listadd() {        //好友列表
     //TODO:查找数据库    
 }
 //第一次连接服务器,暴露了一个io的全局变量，默认连接到提供当前页面的主机
-var socket = io.connect();
+var socket = io.connect('http://localhost:3001');
 socket.on('welcome', function (data) {
     document.getElementById("tishi").innerHTML = "Welcome!" + person.name;
     console.log(data.id);
@@ -44,7 +44,7 @@ function logout() {
 
 //此用户的json对象
 var person = {
-    "name": "zzx",
+    "name": "wxy",
     "socketid": "none",
     "toname": "none",
     "message": "none"
@@ -70,13 +70,20 @@ function selefri() {
     if (idname != "请选择聊天好友") {
         //遍历该用户所有聊天会话chatfri，查找是否该会话已存在
         var id = find_chat_fri(idname);
-        if (id == 0) {  //未找到，增加新会话
-            num++;
-            chatfri.push(idname);
-            id = num;
+        console.log(idname,id);
+        if (id == 0) {  //未找到该会话，增加新会话
+            if (chatfri[0] == "deleted") {  //如果会话1 被删除过，则新增加的会话替代1会话
+                id = 1;
+                chatfri[0] = idname;
+            }
+            else {      //如果会话1没有被删除，则往后新增加一个会话
+                num++;
+                chatfri.push(idname);
+                id = num;
+            }
             addchat(id, idname);
         }
-        person.toname = idname;
+        console.log(chatfri);
         send_mess(id);
     };
 }
@@ -86,23 +93,32 @@ socket.on('chat message', function (data) {
     var id = find_chat_fri(idname);
     if (idname == "server") {   //接收服务器发来的消息
         id = -1;
+        var toname = data.toname;
+        //TODO:调用函数删除该用户相关信息
+        var deleid = find_chat_fri(toname);
+        delechat(deleid);
         alert(data.message);
     }
     if (id == 0) {  //未找到该会话，增加新会话
-        num++;
-        chatfri.push(idname);
-        id = num;
-        addchat(id, idname);
+        if (chatfri[0] == "deleted") {  //若会话1被删除，则新增的会话填充会话1 
+            id = 1;
+            chatfri[0] = idname;
+        }
+        else {
+            num++;
+            chatfri.push(idname);
+            id = num;
+        }
+        addchat(id);
     }
-    person.toname = data.name;
     addlile(data.message, id);
 });
 //发送消息函数,n为对应的会话id
 function send_mess(n) {
-    if (person.toname != "non") {       //TODO:none
+    if ((chatfri[n-1])&&(chatfri[n-1] != "deleted")) {    
         var mess = document.getElementById("textx" + n).value;
         var texx = chatfri[n - 1];
-        person.toname = texx;   //根据会话id:n确定会话发送目标toname
+        person.toname = texx;       //根据会话id:n确定会话发送目标toname
         person.message = mess;
         if (mess != "") {
             addliri(mess, n);
@@ -115,16 +131,18 @@ function send_mess(n) {
     document.getElementById("textx" + n).value = "";
 }
 //辅助函数
-function addchat(n, str) {
+function addchat(n) {
     if (n == 1) {
         var tex = document.getElementById("chattop1");
-        tex.innerHTML = str;
+        tex.innerHTML = chatfri[0];
+        var close = document.getElementById("close1");
+        close.innerHTML = "&times";
     }
     else {
         var chatbox = document.getElementById("chatbox");
         var chatwin = document.createElement("div");
         chatwin.setAttribute("class", "chatright");
-        chatwin.setAttribute("id", n);
+        chatwin.setAttribute("id", "chatwin" + n);
         var chattop = document.createElement("div");
         chattop.setAttribute("class", "top");
         var chatcenter = document.createElement("div");
@@ -137,8 +155,15 @@ function addchat(n, str) {
         var tonamespan = document.createElement("span");
         tonamespan.setAttribute("class", "spa");
         tonamespan.setAttribute("id", "chattop" + n);
-        tonamespan.innerHTML = str;
+        tonamespan.innerHTML = chatfri[n-1];
+        var close = document.createElement("span");
+        close.setAttribute("class","close");
+        close.setAttribute("title","Close Moal");
+        close.setAttribute("id","close"+n);
+        close.setAttribute("onclick","delechat("+n+")");
+        close.innerHTML = "&times";
         chattop.appendChild(tonamespan);
+        chattop.appendChild(close);
         var ulmes = document.createElement("ul");
         ulmes.setAttribute("class", "ull");
         ulmes.setAttribute("id", "ulll" + n);
@@ -149,12 +174,32 @@ function addchat(n, str) {
         tex.setAttribute("placeholer", "请在此输入要发送的内容...");
         var but = document.createElement("button");
         but.setAttribute("class", "sendbtn");
-        but.setAttribute("id", "sendbtn" + num);
+        but.setAttribute("id", "sendbtn" + n);
         but.setAttribute("onclick", "send_mess(" + n + ")");
         but.innerHTML = "发送";
         chatfoot.appendChild(tex);
         chatfoot.appendChild(but);
         chatbox.appendChild(chatwin);
+    }
+}
+//删除会话
+function delechat(n) {
+    if (n == 1) {
+        //TODO:清空chattop1的文字
+        var top1 = document.getElementById("chattop1");
+        top1.innerHTML = "";
+        var text1 = document.getElementById("textx1");
+        text1.innerHTML = "";
+        var ulq = document.getElementById("ulll1");
+        ulq.innerHTML = "";
+        var clo = document.getElementById("close1");
+        clo.innerHTML = "";
+        chatfri[0] = "deleted";
+    }
+    else {
+        var chatwin = document.getElementById("chatwin" + n);
+        chatwin.parentNode.removeChild(chatwin);
+        chatfri[n - 1] = "deleted";
     }
 }
 function addliri(messages, id) {

@@ -8,7 +8,7 @@ var urlencodedParser = bodyParser.urlencoded({
 router.get('/', function(req, res, next) {
   if(!req.session.message)
   {
-    req.session.message = '';
+    req.session.message = "";
   }
   res.render('index', { message: req.session.message });
 });
@@ -16,9 +16,9 @@ router.get('/', function(req, res, next) {
 router.post('/login',urlencodedParser ,function(req,res,next){
   console.log(req.body.username);
   //TODO:需要判断用户是否注册，查询数据库
-  if((req.body.username == 'wxy')&&(req.body.password == '123')){
+  //TODO:解决用户重复登录的问题
+  if((req.body.username == 'wxy1')||(req.body.username == 'wxy2')||(req.body.username == 'wxy3')){
     req.session.user = req.body.username;
-    req.session.message = "Login success!";
     res.redirect('/user');
   }
   else if(req.body.username == 'admin') //TODO:连接管理员数据库查询
@@ -30,12 +30,13 @@ router.post('/login',urlencodedParser ,function(req,res,next){
     req.session.message = "Login failed!Please check your username and password!";
     res.redirect('/');
   }
-
 });
 
 router.get('/user',function(req,res,next){
-  //TODO:
-  res.render('user',{ user_name:req.session.user, message: req.session.message });
+  //给每个成功登录的用户随机分配聊天消息转发服务器1、2
+  server = Math.floor(Math.random()*2+1);
+  //TODO:将（用户，对应server）对应关系进行数据库存储
+  res.render('user',{ user_name:req.session.user,chat_server:server});
 });
 
 router.post('/register',function(req,res,next){
@@ -49,7 +50,7 @@ router.get('/logout',function(req,res,next)
   req.session.user = '';
   req.session.message="Logout Success!";
   res.redirect('/');
-  //TODO:删除登录用户在线信息
+  //TODO:删除登录用户在线信息（用户，server）
 });
 
 module.exports = router;

@@ -8,7 +8,6 @@ var session = require('express-session');
 var indexRouter = require('./routes/index');
 var dataRouter = require('./routes/data');
 var app = express();
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

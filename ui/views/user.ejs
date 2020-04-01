@@ -1,20 +1,53 @@
-<!--This is the user's view part-->
-<!DOCTYPE html>
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <title>user</title>
-    <link rel='stylesheet' href='/stylesheets/button.css' />
+    <title>chat UI</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="/stylesheets/client.css" rel="stylesheet">
+    <link href="/stylesheets/button.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
 </head>
+<script>document.getElementsByTagName('body').height = window.innerHeight;</script>
 
-<body>
-    <h1>你好,<%=user_name%>!欢迎来到你的空间！</h1>
-    <h2><%=message%></h2>
-    <div id="butt">
-        <button class="but" onclick="window.location.href='/logout'">退出登录
-        </button>
+<body class="box">
+    <div class="container">
+        <h1 id="sess_name" display ="none"><%= user_name%></h1>
+        <p id = "chatserver" display ="none"><%= chat_server%></p>
+        <button class="sendbtn" onclick="logout()">退出</button>
+        <div class="chatbox" id="chatbox">
+            <!--TODO:好友列表-->
+            <div class="chatleft">
+                <div class="top">
+                    <div class="select">
+                        <select id="myselect" onchange="selefri()">
+                            <option>请选择聊天好友</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="center">
+                    <ul id="listul">
+                    </ul>
+                </div>
+            </div>
+            <div class="chatright" id="chatwin1">
+                <div class="top">
+                    <span id="chattop1" class="spa"></span>
+                    <span onclick="delechat(1)" class="close" title="Close Modal" id="close1"></span>
+                </div>
+                <div class="center">
+                    <ul class="ull" id="ulll1">
+                        <!--TODO:聊天记录通过增加Li标签-->
+                    </ul>
+                </div>
+                <div class="footer">
+                    <textarea class="text" id="textx1" placeholder="请在此输入要发送的内容..."></textarea>
+                    <button class="sendbtn" id="sendbtn1" onclick="send_mess(1)">发送</button>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
-
 </html>
+<script type="text/javascript" src="/stylesheets/chat.js"></script>
+<script>
+</script>
