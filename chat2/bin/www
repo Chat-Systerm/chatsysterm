@@ -20,6 +20,7 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+console.log("Chat server2 is working in port 3002...");
 
 /**
  * Listen on provided port, on all network interfaces.

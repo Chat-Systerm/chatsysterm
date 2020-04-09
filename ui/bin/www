@@ -21,6 +21,7 @@ app.set('port', port);
 
 var server = http.createServer(app);
 var io = require('socket.io')(server);
+console.log("UI server is working in port 3000...");
 /**
  * Listen on provided port, on all network interfaces.
  */

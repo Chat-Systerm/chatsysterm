@@ -2,12 +2,44 @@ body {
     padding: 0px;
     margin: 0px;
 }
-.container {
+html,body{
+    width: 100%;
+    height: 100%;
+}
+.containerr {
     height: 100%;
     width: 100%;
     background:  linear-gradient(#1f94bf 20%,#edf5f8 0, #edf5f8 80%, #1f94bf 0);
     display: flex;
     margin: 0;
+    position: fixed;
+}
+.chatpre{
+    margin: auto;
+    height: 50%;
+    width: 20%;
+    transform: translateY(-10%);
+    display: flex;    
+}
+#imgshow{
+    height:30%;
+    width:100%;
+    display: none; 
+}
+#audshow{
+    height:20%;
+    width:100%;
+    display:none; 
+}
+#vidshow{
+    height:50%;
+    width:100%;
+    display:none; 
+}
+#fileshow{
+    height:100%;
+    width:100%;
+    display:none;    
 }
 .chatbox {
     margin: auto;
@@ -103,6 +135,18 @@ body {
 .msgright .msgcard{
     background-color:lightgreen;
     float:right;
+}
+#imgli{
+    height:30px;
+    width:35px;
+}
+#vidli{
+    height:30px;
+    width:35px;
+}
+#audli{
+    height:30px;
+    width:35px;
 }
 .chatright .footer {
     height: 25%;

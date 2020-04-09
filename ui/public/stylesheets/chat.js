@@ -35,7 +35,8 @@ var person = {
     "socketid": "none",
     "toname": "none",
     "chat_server":0,
-    "message": "none"
+    "message": "none",
+    "type":"none"
 };
 person.name = document.getElementById("sess_name").innerHTML;
 person.chat_server = document.getElementById("chatserver").innerHTML;
@@ -49,7 +50,7 @@ else if(person.chat_server == 2){
 }
 socket.on('welcome', function (data) {
     //document.getElementById("tishi").innerHTML = "Welcome!" + person.name;
-    console.log(data.id);
+    console.log("socketid:",data.id);
     person.socketid = data.id;
     socket.emit('welcome', person);
 });
@@ -93,11 +94,13 @@ function selefri() {
             addchat(id, idname);
         }
         console.log(chatfri);
-        send_mess(id);
+        person.type = "none";
+        //socket.emit('sayto', person);
     };
 }
 //随时监听任何人发来的聊天信息：被动接收新会话/接收已存在会话的消息
 socket.on('chat message', function (data) {
+    console.log(data);
     var idname = data.name;   //遍历该用户聊天会话，查找是否该会话已存在
     var id = find_chat_fri(idname);
     if (idname == "server") {   //接收服务器发来的消息
@@ -119,24 +122,60 @@ socket.on('chat message', function (data) {
         }
         addchat(id);
     }
-    addlile(data.message, id);
+    if(data.type == "text"){
+        addlile(data.message, id);
+    }
+    else if(data.type == "img"){
+        addimgle(data.message,id);
+    }
+    else if(data.type == "video"){
+        addvidle(data.message,id);
+    }
+    else if(data.type == "audio"){
+        addaudle(data.message,id);
+    }
 });
 //发送消息函数,n为对应的会话id
 function send_mess(n) {
-    if ((chatfri[n-1])&&(chatfri[n-1] != "deleted")) {    
+    if ((chatfri[n-1])&&(chatfri[n-1] != "deleted")) {  
         var mess = document.getElementById("textx" + n).value;
         var texx = chatfri[n - 1];
         person.toname = texx;       //根据会话id:n确定会话发送目标toname
-        person.message = mess;
-        if (mess != "") {
+        //console.log(audio);
+        if (mess != '') {
             addliri(mess, n);
+            person.type = "text";
+            person.message = mess;
         }
+        if(person.type == "img"){
+            img = document.getElementById("imgshow").src;
+            person.message = img;
+            addimgri(img,n);
+            document.getElementById("imgshow").removeAttribute("src");
+            document.getElementById("imgshow").style.display = "none";
+        }
+        if(person.type == "audio"){
+            audio = document.getElementById("audshow").src;
+            person.message = audio;
+            addaudri(audio,n);
+            document.getElementById("audshow").removeAttribute("src");
+            document.getElementById("audshow").style.display = "none";
+        }
+        if(person.type == "video"){
+            video = document.getElementById("vidshow").src;
+            person.message = video;    
+            addvidri(video,n);
+            document.getElementById("vidshow").removeAttribute("src");
+            document.getElementById("vidshow").style.display = "none";       
+        }
+        console.log(person);
         socket.emit('sayto', person);
     }
     else {
         alert("请先选择聊天好友！");
     }
     document.getElementById("textx" + n).value = "";
+    document.getElementById("fileinput" + n).value = "";
 }
 //辅助函数
 function addchat(n) {
@@ -145,6 +184,7 @@ function addchat(n) {
         tex.innerHTML = chatfri[0];
         var close = document.getElementById("close1");
         close.innerHTML = "&times";
+        readFile(1);
     }
     else {
         var chatbox = document.getElementById("chatbox");
@@ -176,6 +216,9 @@ function addchat(n) {
         ulmes.setAttribute("class", "ull");
         ulmes.setAttribute("id", "ulll" + n);
         chatcenter.appendChild(ulmes);
+        var file = document.createElement("input");
+        file.setAttribute("type","file");
+        file.setAttribute("id","fileinput"+n);
         var tex = document.createElement("textarea");
         tex.setAttribute("class", "text");
         tex.setAttribute("id", "textx" + n);
@@ -185,9 +228,11 @@ function addchat(n) {
         but.setAttribute("id", "sendbtn" + n);
         but.setAttribute("onclick", "send_mess(" + n + ")");
         but.innerHTML = "发送";
+        chatfoot.appendChild(file);
         chatfoot.appendChild(tex);
         chatfoot.appendChild(but);
         chatbox.appendChild(chatwin);
+        readFile(n);
     }
 }
 //删除会话
@@ -219,6 +264,38 @@ function addliri(messages, id) {
     li.appendChild(pp);
     biaoqian.appendChild(li);
 }
+function addimgri(imgsrc,id) {
+    var biaoqian = document.getElementById("ulll" + id);
+    var li = document.createElement("li");
+    li.setAttribute("class", "msgright");
+    var ppp = document.createElement("p");
+    ppp.setAttribute("class","msgcard");
+    ppp.innerHTML = "<图片>";
+    li.appendChild(ppp);
+    biaoqian.appendChild(li);
+}
+function addvidri(vidsrc,id) {
+    var biaoqian = document.getElementById("ulll" + id);
+    var li = document.createElement("li");
+    li.setAttribute("class", "msgright");
+    var ppp = document.createElement("p");
+    ppp.setAttribute("class","msgcard");
+    ppp.innerHTML = "<视频>";
+    li.appendChild(ppp);
+    biaoqian.appendChild(li);
+}
+function addaudri(audsrc,id) {
+    console.log("audio");
+    var biaoqian = document.getElementById("ulll" + id);
+    var li = document.createElement("li");
+    li.setAttribute("class", "msgright");
+    var ppp = document.createElement("p");
+    ppp.setAttribute("class","msgcard");
+    ppp.innerHTML = "<音频>";
+    li.appendChild(ppp);
+    biaoqian.appendChild(li);
+}
+
 function addlile(messages, id) {
     if (id != -1) {
         var biaoqian = document.getElementById("ulll" + id);
@@ -230,4 +307,97 @@ function addlile(messages, id) {
         li.appendChild(pp);
         biaoqian.appendChild(li);
     }
+}
+
+function addimgle(imgsrc,id) {
+    var biaoqian = document.getElementById("ulll" + id);
+    var li = document.createElement("li");
+    li.setAttribute("class", "msgleft");
+    var ppp = document.createElement("p");
+    ppp.setAttribute("class","msgcard");
+    ppp.innerHTML = "<图片>";
+    li.appendChild(ppp);
+    biaoqian.appendChild(li);
+    imggshow(imgsrc);     
+
+}
+function addvidle(vidsrc,id) {
+    var biaoqian = document.getElementById("ulll" + id);
+    var li = document.createElement("li");
+    li.setAttribute("class", "msgleft");
+    var ppp = document.createElement("p");
+    ppp.setAttribute("class","msgcard");
+    ppp.innerHTML = "<视频>";
+    li.appendChild(ppp);
+    biaoqian.appendChild(li);
+    videoshow(vidsrc);
+
+}
+function addaudle(audsrc,id) {
+    var biaoqian = document.getElementById("ulll" + id);
+    var li = document.createElement("li");
+    li.setAttribute("class", "msgleft");
+    var ppp = document.createElement("p");
+    ppp.setAttribute("class","msgcard");
+    ppp.innerHTML = "<音频>";
+    li.appendChild(ppp);
+    biaoqian.appendChild(li);
+    audioshow(audsrc);
+}
+
+//监听input标签
+function readFile(n) {
+    var input = document.getElementById("fileinput"+n);
+    if (typeof (FileReader) === 'undefined') {
+        result.innerHTML = "抱歉，你的浏览器不支持 FileReader，请使用现代浏览器操作！";
+        input.setAttribute('disabled', 'disabled');
+    } else {
+        input.addEventListener('change', readfile, false);
+    }    
+}
+function readfile(){
+    var file = this.files[0];
+    //readAsDataURL方法会读取指定的 Blob 或 File 对象。
+    //读取操作完成的时候,result 属性将包含一个data:URL格式的字符串（base64编码）以表示所读取文件的内容
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function (e) { 
+        //img的src属性或background的url属性，可以通过被赋值为图片网络地址或base64的方式显示图片
+        var typee = this.result.substring(this.result.indexOf('/')+1,this.result.indexOf(';'));
+        console.log('type:',typee);
+        if((typee =="png")||(typee == "img")){
+            imggshow(this.result);
+            person.type = "img";
+        }
+        else if(typee == "mp4"){
+            videoshow(this.result);
+            person.type = "video";
+
+        }
+        else if(typee == "mp3"){
+            audioshow(this.result);
+            person.type = "audio";
+        }
+        else if((typee == "pdf")||(typee == "txt")||(typee == "docx")||(typee == "doc")||(typee == "xlsx")){
+            //TODO:
+        }
+    }
+}
+function imggshow(src){
+    imgshow.src = src;
+    document.getElementById("imgshow").style.display='block';
+    document.getElementById("vidshow").style.display='none';
+    document.getElementById("audshow").style.display='none';   
+}
+function videoshow(src){
+    vidshow.src = src;
+    document.getElementById("imgshow").style.display='none';
+    document.getElementById("vidshow").style.display='block';
+    document.getElementById("audshow").style.display='none';
+}
+function audioshow(src){
+    audshow.src = src; 
+    document.getElementById("imgshow").style.display='none';
+    document.getElementById("vidshow").style.display='none';
+    document.getElementById("audshow").style.display='block';
 }

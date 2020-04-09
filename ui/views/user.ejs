@@ -10,10 +10,16 @@
 <script>document.getElementsByTagName('body').height = window.innerHeight;</script>
 
 <body class="box">
-    <div class="container">
-        <h1 id="sess_name" display ="none"><%= user_name%></h1>
-        <p id = "chatserver" display ="none"><%= chat_server%></p>
+    <div class="containerr">
+        <h1 id="sess_name"><%= user_name%></h1>
+        <p id="chatserver"><%= chat_server%></p>
         <button class="sendbtn" onclick="logout()">退出</button>
+        <div class="chatpre">
+            <img id="imgshow">
+            <audio id="audshow" controls="controls"></audio>
+            <video id="vidshow" controls="controls"></video>
+            <a id="fileshow"></a>
+        </div>
         <div class="chatbox" id="chatbox">
             <!--TODO:好友列表-->
             <div class="chatleft">
@@ -40,6 +46,7 @@
                     </ul>
                 </div>
                 <div class="footer">
+                    <input type="file" id="fileinput1" />
                     <textarea class="text" id="textx1" placeholder="请在此输入要发送的内容..."></textarea>
                     <button class="sendbtn" id="sendbtn1" onclick="send_mess(1)">发送</button>
                 </div>
@@ -47,6 +54,7 @@
         </div>
     </div>
 </body>
+
 </html>
 <script type="text/javascript" src="/stylesheets/chat.js"></script>
 <script>

@@ -11,35 +11,60 @@ var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({
   extended: false
 });
-//udp套接字连接两个服务器
+//***********************************udp套接字连接两个服务器,实现两个服务器之间的文字传递
 var udp = require('dgram');
 var clientSocket = udp.createSocket('udp4');
 //实现chat_server1转发给chat_server2的消息的传递
 clientSocket.on('message', function (msg, rinfo) {
-  console.log('recv %s from chat_server1 %s:%d\n', msg, rinfo.address, rinfo.port);
+  //console.log('recv %s of %d bytes from chat_server1 %s:%d\n', msg, msg.length, rinfo.address, rinfo.port);
   var mes = JSON.parse(msg);
   var tagname = mes.toname;
   var tagid = find_online2(tagname);
-  var tosocket =socket_send(tagid);
+  var tosocket = socket_send(tagid);
   tosocket.emit('chat message', mes);
 });
 clientSocket.on('error', function (err) {
   console.log('error, msg - %s, stack - %s\n', err.message, err.stack);
 });
-clientSocket.bind(54321);
-//socket.io
+clientSocket.bind(54320);
+//**********************************tcp套接字实现两个聊天传输服务器chatServer的图片、视频、音频传输
+var net = require("net");
+var chatserver1_message = "";
+var client = net.connect({ port: 8124 }, function () {
+  console.log('tcp套接字已连接');
+});
+//监听TCP服务器chatserver1转发给TCP客户端chatserver2的信息data(chat_message1)
+client.on('data', function (data) { 
+  //console.log('recv %d bytes from tcp_chat_server1\n',data.length );
+  chatserver1_message = chatserver1_message + data.toString();  //多个包拼接
+  if (chatserver1_message.substr(chatserver1_message.length - 1, 1) == '}') {  //接收结束
+    //console.log(chatserver1_message);
+    var mes = JSON.parse(chatserver1_message);
+    var tagname = mes.toname;
+    var tagid = find_online2(tagname);
+    var tosocket = socket_send(tagid);
+    tosocket.emit('chat message', mes);
+    chatserver1_message = ""; //每转发完一次都清空全局变量chatserver1_mseeage
+  }
+});
+client.on('end', function () {
+  console.log('client disconnected');
+});
+
+//*********************************socket.io实现前端客户与聊天转发服务器chatserver2的文字、图片、视频、音频转发
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 server.listen(3002);
 var _ = require('underscore');
 var totalonline2 = 0;
-var onlineUsers2 = []; //统计客户端登录用户
+var onlineUsers2 = []; //统计绑定在chat server2的客户端登录用户
 var person = {
   "name": "n",
   "socketid": "n",
   "toname": "n",
   "chat_server": "n",
-  "message": "n"
+  "message": "n",
+  "type": "none"
 }
 //将socket.io 附加到 http server上，当 http server 接收到 upgrade websocket 时就将请求转给 socket.io 处理。
 //服务端启动一个io服务，并监听'connection'事件;每次刷新浏览器，套接字id都不同
@@ -50,28 +75,36 @@ io.on('connection', function (socket) { //这里的参数socket对应每个客�
   socket.on('welcome', function (pers) {
     person = pers;
     onlineUsers2.push(person);
-    console.log("chat_server:2", onlineUsers2);
+    //console.log("chat_server:2", onlineUsers2);
   });
   socket.on('sayto', function (data) {
+    //console.log(data);
     var toname = data.toname;
-    var messg = data.message;
+    var type = data.type;
+    var mess = data.message;
     //查询数据库登录表，查看目标用户是否在线
     //TODO:if(不在线)
     //socket.emit('chat message', { "message": "该用户不在线，请稍后再试！", "name": "server", "toname": toname });
     //else(在线)
     var toid = find_online2(toname);   //判读目标用户是否在此服务器，在线返回其socketid，不在则返回0
+    //目的用户不在此服务器，则采取二者服务器之间的udp/tcp通道发送数据给chat_server1
     if (toid == 0) {
-      if (messg != "") {
-        //目的用户不在此服务器，则采取二者服务器之间的udp通道发送数据给chat_server2
-        var strdata = JSON.stringify(data);
-        clientSocket.send(strdata,8060, "localhost");
+      var strdata = JSON.stringify(data);
+      if (type == "text") { //文本消息采用udp传输
+        clientSocket.send(strdata, 8061, "localhost");
+      }
+      else if (type != "none") { //图片、视频、音频采用tcp传输
+         //tcp客户端（chat_server2）转发消息给tcp服务端（chat_server1），由于是Tcp客户端，所以不用触发事件即可发送给tcp服务端
+        //console.log('bytes:',strdata.length);
+        client.write(strdata);
       }
     }
-    else {   //目的用户在此服务器，将消息传递给该用户
+     //目的用户在此服务器，直接将消息传递给该用户
+    else {  
       // nodejs的underscore扩展中的findWhere方法，可以在对象集合中，通过对象的属性值找到该对象并返回。
       //服务器能接收到所有用户发的消息，只要改消息有toname并且可以找到，服务器就能转发给对应用户
-      var toSocket =socket_send(toid);
-      if (messg != "") {
+      var toSocket = socket_send(toid);
+      if (type != "none") {
         toSocket.emit('chat message', data);
       }
     }
@@ -98,8 +131,8 @@ function find_online2(str) {
   }
   return toid;
 }
-//通过id转发消息
-function socket_send(idd){
+//通过socketid查询对应的socket
+function socket_send(idd) {
   var toSocket = _.findWhere(io.sockets.sockets, { id: idd });
   return toSocket;
 }
