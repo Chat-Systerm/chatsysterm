@@ -62,3 +62,25 @@
 		background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 		padding-top: 60px;
 	  }
+	  table.gridtable {
+		font-family: verdana,arial,sans-serif;
+		font-size:5px;
+		color:#333333;
+		border-width: 1px;
+		border-color: #7FFFD4;
+		border-collapse: collapse;
+	 }
+	  table.gridtable th {
+		border-width: 1px;
+		padding: 3px;
+		border-style: solid;
+		border-color: #666666;
+		background-color: #FAEBD7;
+	  }
+	 table.gridtable td {
+		 border-width: 1px;
+		 padding: 3px;
+		 border-style: solid;
+		 border-color: #666666;
+		background-color: LightCyan;
+	 }

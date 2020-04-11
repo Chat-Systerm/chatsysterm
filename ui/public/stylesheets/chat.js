@@ -1,64 +1,28 @@
-//页面加载需完成的工作：连接后方数据库，查找该用户的朋友，将其增加到好友列表、聊天选择栏
-window.onload = seleadd(), listadd();
-function seleadd() {    //聊天选择栏
-    var sele = document.getElementById("myselect");
-    sele.innerHTML = "";
-    var opp = document.createElement("option");
-    opp.setAttribute("value", "tishi");
-    opp.innerHTML = "请选择聊天好友";
-    sele.appendChild(opp);
-    var op = document.createElement("option");
-    //TODO:查找数据库增加好友
-    op.setAttribute("value", "wxy1");
-    op.innerHTML = "wxy1";
-    sele.appendChild(op);
-    var op2 = document.createElement("option");
-    op2.setAttribute("value", "wxy2");
-    op2.innerHTML = "wxy2";
-    sele.appendChild(op2);
-    var op3 = document.createElement("option");
-    op3.setAttribute("value", "wxy3");
-    op3.innerHTML = "wxy3";
-    sele.appendChild(op3);
-}
-function listadd() {        //好友列表
-    var biaoqian = document.getElementById("listul");
-    biaoqian.innerHTML = "";
-    var li = document.createElement("li");
-    li.innerHTML = "zzx";
-    biaoqian.appendChild(li);
-    //TODO:查找数据库    
-}
 //此用户的json对象
 var person = {
     "name": "none",
     "socketid": "none",
     "toname": "none",
-    "chat_server":0,
+    "chat_server": 0,
     "message": "none",
-    "type":"none"
+    "type": "none"
 };
 person.name = document.getElementById("sess_name").innerHTML;
 person.chat_server = document.getElementById("chatserver").innerHTML;
-console.log(person);
+//console.log(person);
 //第一次连接服务器,暴露了一个io的全局变量，默认连接到提供当前页面的主机
-if(person.chat_server == 1){
+if (person.chat_server == 1) {
     var socket = io.connect('http://localhost:3001');
 }
-else if(person.chat_server == 2){
+else if (person.chat_server == 2) {
     var socket = io.connect('http://localhost:3002');
 }
 socket.on('welcome', function (data) {
     //document.getElementById("tishi").innerHTML = "Welcome!" + person.name;
-    console.log("socketid:",data.id);
+    console.log("socketid:", data.id);
     person.socketid = data.id;
     socket.emit('welcome', person);
 });
-function logout() {
-    socket.close();
-    window.location.href='/logout';
-}
-
 //此用户的会话数、储存会话的数组
 var num = 0;
 var chatfri = new Array();
@@ -72,6 +36,12 @@ function find_chat_fri(str) {
     }
     return q;   //找到则返回对应会话id，未找到返回0
 }
+socket.emit('friendadd');
+socket.on('friend',function(data){
+   seleadd(data);
+   listadd(data);
+   findhistory(data);
+});
 //选中好友开始聊天:主动发起聊天,每选中一次创建一个会话,但需判断该会话是否已存在
 function selefri() {
     var sele = document.getElementById("myselect");
@@ -80,7 +50,7 @@ function selefri() {
     if (idname != "请选择聊天好友") {
         //遍历该用户所有聊天会话chatfri，查找是否该会话已存在
         var id = find_chat_fri(idname);
-        console.log(idname,id);
+        console.log(idname, id);
         if (id == 0) {  //未找到该会话，增加新会话
             if (chatfri[0] == "deleted") {  //如果会话1 被删除过，则新增加的会话替代1会话
                 id = 1;
@@ -93,10 +63,36 @@ function selefri() {
             }
             addchat(id, idname);
         }
-        console.log(chatfri);
+        //console.log(chatfri);
         person.type = "none";
-        //socket.emit('sayto', person);
     };
+}
+function findhistory(fridata){
+    var sele = document.getElementById("historyfind");
+    for(var i =0;i<fridata.length;i++){
+        var op = document.createElement("option");
+        op.setAttribute("value",fridata[i].UserName);
+        op.innerHTML = fridata[i].UserName;
+        sele.appendChild(op);
+    }
+}
+function seleadd(fridata) {    //聊天选择栏
+    var sele = document.getElementById("myselect");
+    for(var i =0;i<fridata.length;i++){
+        var op = document.createElement("option");
+        op.setAttribute("value",fridata[i].UserName);
+        op.innerHTML = fridata[i].UserName;
+        sele.appendChild(op);
+    }
+}
+function listadd(datafri) {        //好友列表
+    var biaoqian = document.getElementById("listul");
+    biaoqian.innerHTML = "";
+    for(var i=0;i<datafri.length;i++){
+        var li = document.createElement("li");
+        li.innerHTML = datafri[i].UserName;
+        biaoqian.appendChild(li);
+    }
 }
 //随时监听任何人发来的聊天信息：被动接收新会话/接收已存在会话的消息
 socket.on('chat message', function (data) {
@@ -122,22 +118,22 @@ socket.on('chat message', function (data) {
         }
         addchat(id);
     }
-    if(data.type == "text"){
+    if (data.type == "text") {
         addlile(data.message, id);
     }
-    else if(data.type == "img"){
-        addimgle(data.message,id);
+    else if (data.type == "img") {
+        addimgle(data.message, id);
     }
-    else if(data.type == "video"){
-        addvidle(data.message,id);
+    else if (data.type == "video") {
+        addvidle(data.message, id);
     }
-    else if(data.type == "audio"){
-        addaudle(data.message,id);
+    else if (data.type == "audio") {
+        addaudle(data.message, id);
     }
 });
 //发送消息函数,n为对应的会话id
 function send_mess(n) {
-    if ((chatfri[n-1])&&(chatfri[n-1] != "deleted")) {  
+    if ((chatfri[n - 1]) && (chatfri[n - 1] != "deleted")) {
         var mess = document.getElementById("textx" + n).value;
         var texx = chatfri[n - 1];
         person.toname = texx;       //根据会话id:n确定会话发送目标toname
@@ -147,26 +143,26 @@ function send_mess(n) {
             person.type = "text";
             person.message = mess;
         }
-        if(person.type == "img"){
+        if (person.type == "img") {
             img = document.getElementById("imgshow").src;
             person.message = img;
-            addimgri(img,n);
+            addimgri(img, n);
             document.getElementById("imgshow").removeAttribute("src");
             document.getElementById("imgshow").style.display = "none";
         }
-        if(person.type == "audio"){
+        if (person.type == "audio") {
             audio = document.getElementById("audshow").src;
             person.message = audio;
-            addaudri(audio,n);
+            addaudri(audio, n);
             document.getElementById("audshow").removeAttribute("src");
             document.getElementById("audshow").style.display = "none";
         }
-        if(person.type == "video"){
+        if (person.type == "video") {
             video = document.getElementById("vidshow").src;
-            person.message = video;    
-            addvidri(video,n);
+            person.message = video;
+            addvidri(video, n);
             document.getElementById("vidshow").removeAttribute("src");
-            document.getElementById("vidshow").style.display = "none";       
+            document.getElementById("vidshow").style.display = "none";
         }
         console.log(person);
         socket.emit('sayto', person);
@@ -176,6 +172,8 @@ function send_mess(n) {
     }
     document.getElementById("textx" + n).value = "";
     document.getElementById("fileinput" + n).value = "";
+    //socket.emit('history');
+    send(); //每次发送消息后都申请查询聊天记录以更新chathistory数组
 }
 //辅助函数
 function addchat(n) {
@@ -203,12 +201,12 @@ function addchat(n) {
         var tonamespan = document.createElement("span");
         tonamespan.setAttribute("class", "spa");
         tonamespan.setAttribute("id", "chattop" + n);
-        tonamespan.innerHTML = chatfri[n-1];
+        tonamespan.innerHTML = chatfri[n - 1];
         var close = document.createElement("span");
-        close.setAttribute("class","close");
-        close.setAttribute("title","Close Moal");
-        close.setAttribute("id","close"+n);
-        close.setAttribute("onclick","delechat("+n+")");
+        close.setAttribute("class", "close");
+        close.setAttribute("title", "Close Moal");
+        close.setAttribute("id", "close" + n);
+        close.setAttribute("onclick", "delechat(" + n + ")");
         close.innerHTML = "&times";
         chattop.appendChild(tonamespan);
         chattop.appendChild(close);
@@ -217,8 +215,8 @@ function addchat(n) {
         ulmes.setAttribute("id", "ulll" + n);
         chatcenter.appendChild(ulmes);
         var file = document.createElement("input");
-        file.setAttribute("type","file");
-        file.setAttribute("id","fileinput"+n);
+        file.setAttribute("type", "file");
+        file.setAttribute("id", "fileinput" + n);
         var tex = document.createElement("textarea");
         tex.setAttribute("class", "text");
         tex.setAttribute("id", "textx" + n);
@@ -264,33 +262,33 @@ function addliri(messages, id) {
     li.appendChild(pp);
     biaoqian.appendChild(li);
 }
-function addimgri(imgsrc,id) {
+function addimgri(imgsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgright");
     var ppp = document.createElement("p");
-    ppp.setAttribute("class","msgcard");
+    ppp.setAttribute("class", "msgcard");
     ppp.innerHTML = "<图片>";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
 }
-function addvidri(vidsrc,id) {
+function addvidri(vidsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgright");
     var ppp = document.createElement("p");
-    ppp.setAttribute("class","msgcard");
+    ppp.setAttribute("class", "msgcard");
     ppp.innerHTML = "<视频>";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
 }
-function addaudri(audsrc,id) {
+function addaudri(audsrc, id) {
     console.log("audio");
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgright");
     var ppp = document.createElement("p");
-    ppp.setAttribute("class","msgcard");
+    ppp.setAttribute("class", "msgcard");
     ppp.innerHTML = "<音频>";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
@@ -309,36 +307,36 @@ function addlile(messages, id) {
     }
 }
 
-function addimgle(imgsrc,id) {
+function addimgle(imgsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgleft");
     var ppp = document.createElement("p");
-    ppp.setAttribute("class","msgcard");
+    ppp.setAttribute("class", "msgcard");
     ppp.innerHTML = "<图片>";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
-    imggshow(imgsrc);     
+    imggshow(imgsrc);
 
 }
-function addvidle(vidsrc,id) {
+function addvidle(vidsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgleft");
     var ppp = document.createElement("p");
-    ppp.setAttribute("class","msgcard");
+    ppp.setAttribute("class", "msgcard");
     ppp.innerHTML = "<视频>";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
     videoshow(vidsrc);
 
 }
-function addaudle(audsrc,id) {
+function addaudle(audsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgleft");
     var ppp = document.createElement("p");
-    ppp.setAttribute("class","msgcard");
+    ppp.setAttribute("class", "msgcard");
     ppp.innerHTML = "<音频>";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
@@ -347,57 +345,98 @@ function addaudle(audsrc,id) {
 
 //监听input标签
 function readFile(n) {
-    var input = document.getElementById("fileinput"+n);
+    var input = document.getElementById("fileinput" + n);
     if (typeof (FileReader) === 'undefined') {
         result.innerHTML = "抱歉，你的浏览器不支持 FileReader，请使用现代浏览器操作！";
         input.setAttribute('disabled', 'disabled');
     } else {
         input.addEventListener('change', readfile, false);
-    }    
+    }
 }
-function readfile(){
+function readfile() {
     var file = this.files[0];
     //readAsDataURL方法会读取指定的 Blob 或 File 对象。
     //读取操作完成的时候,result 属性将包含一个data:URL格式的字符串（base64编码）以表示所读取文件的内容
     var reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = function (e) { 
+    reader.onload = function (e) {
         //img的src属性或background的url属性，可以通过被赋值为图片网络地址或base64的方式显示图片
-        var typee = this.result.substring(this.result.indexOf('/')+1,this.result.indexOf(';'));
-        console.log('type:',typee);
-        if((typee =="png")||(typee == "img")){
+        var typee = this.result.substring(this.result.indexOf('/') + 1, this.result.indexOf(';'));
+        console.log('type:', typee);
+        if ((typee == "png") || (typee == "img")) {
             imggshow(this.result);
             person.type = "img";
         }
-        else if(typee == "mp4"){
+        else if (typee == "mp4") {
             videoshow(this.result);
             person.type = "video";
 
         }
-        else if(typee == "mp3"){
+        else if (typee == "mp3") {
             audioshow(this.result);
             person.type = "audio";
         }
-        else if((typee == "pdf")||(typee == "txt")||(typee == "docx")||(typee == "doc")||(typee == "xlsx")){
+        else if ((typee == "pdf") || (typee == "txt") || (typee == "docx") || (typee == "doc") || (typee == "xlsx")) {
             //TODO:
         }
     }
 }
-function imggshow(src){
+function imggshow(src) {
     imgshow.src = src;
-    document.getElementById("imgshow").style.display='block';
-    document.getElementById("vidshow").style.display='none';
-    document.getElementById("audshow").style.display='none';   
+    document.getElementById("imgshow").style.display = 'block';
+    document.getElementById("vidshow").style.display = 'none';
+    document.getElementById("audshow").style.display = 'none';
 }
-function videoshow(src){
+function videoshow(src) {
     vidshow.src = src;
-    document.getElementById("imgshow").style.display='none';
-    document.getElementById("vidshow").style.display='block';
-    document.getElementById("audshow").style.display='none';
+    document.getElementById("imgshow").style.display = 'none';
+    document.getElementById("vidshow").style.display = 'block';
+    document.getElementById("audshow").style.display = 'none';
 }
-function audioshow(src){
-    audshow.src = src; 
-    document.getElementById("imgshow").style.display='none';
-    document.getElementById("vidshow").style.display='none';
-    document.getElementById("audshow").style.display='block';
+function audioshow(src) {
+    audshow.src = src;
+    document.getElementById("imgshow").style.display = 'none';
+    document.getElementById("vidshow").style.display = 'none';
+    document.getElementById("audshow").style.display = 'block';
+}
+function logout() {
+    socket.close();
+    window.location.href = '/logout';
+}
+var chathistory = new Array();  //聊天记录数组，通过用户发送history事件定时更新
+socket.on('findhis',function(data){
+    chathistory = data;
+    //console.log(chathistory);
+});
+function send(){
+    socket.emit('history');
+}
+//选择查询和某人的聊天记录后触发事件
+function selechat(){
+    send();
+    var result = new Array();
+    var sele = document.getElementById("historyfind");
+    var index = sele.selectedIndex;
+    var idname = myselect.options[index].text;
+    console.log('idname:',idname);
+    if(chathistory.length!=0){
+        for(var i =0;i<chathistory.length;i++){
+            if((chathistory[i].name == idname)||(chathistory[i].toname == idname)){
+                result.push(chathistory[i]);
+            }
+        }
+        if(result.length ==0){
+            alert("未找到相关记录！");
+        }
+        else{
+            for(var j =0;j<result.length;j++){
+
+                alert(result[j].name);
+            }
+        }
+            
+    }
+    else{
+        alert("未找到相关记录！");
+    }
 }

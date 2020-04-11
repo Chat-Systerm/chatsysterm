@@ -14,6 +14,9 @@
         <h1 id="sess_name"><%= user_name%></h1>
         <p id="chatserver"><%= chat_server%></p>
         <button class="sendbtn" onclick="logout()">退出</button>
+        <select id="historyfind" class="sendbtn" onchange="selechat()">
+            <option>查询聊天记录</option>
+        </select>
         <div class="chatpre">
             <img id="imgshow">
             <audio id="audshow" controls="controls"></audio>
@@ -57,5 +60,3 @@
 
 </html>
 <script type="text/javascript" src="/stylesheets/chat.js"></script>
-<script>
-</script>
