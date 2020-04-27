@@ -5,7 +5,8 @@ const pool = mysql.createPool({
     user: 'chatsystem',
     password: '123456',
     database: 'chatsystem',
-    port: 3306
+    port: 3306,
+    timezone:"SYSTEM",
   })
   //保证客户端与服务器之间以同步方式进行
   let query = function (sql, values) {

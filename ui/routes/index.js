@@ -30,10 +30,19 @@ router.post('/login', urlencodedParser, async function (req, res, next) {
       req.session.message = '用户或密码错误！'
       res.redirect('/')
     } else if (user[0].Role == 1) { //管理员登录
+      //解决用户重复登录的问题
+      let q = await query(OnlineuserSQL.getUserbyName,[userName]);
+      if(q.length == 0){  //该用户还未登录，在线用户表中未查找到
       req.session.message = '';
       req.session.user = 'admin';
       req.session.admin = true;
+      await query(OnlineuserSQL.insert, [userName,0]);
       res.redirect('/data/admin');
+      }
+      else{
+        req.session.message = '该用户已登录，请勿重复登录！';
+        res.redirect('/');
+      }
     } else {                     //普通用户登录
       //解决用户重复登录的问题
       let q = await query(OnlineuserSQL.getUserbyName,[userName]);
@@ -67,7 +76,7 @@ router.get('/user', async function (req, res, next) {
 });
 
 router.post('/register', async function (req, res, next) {
-  var newUserName = req.body.username
+  var newUserName = req.body.username;
   var newPassword = sha1(req.body.password)
   console.log(newUserName);
   console.log(newPassword);
@@ -96,10 +105,10 @@ router.post('/register', async function (req, res, next) {
   }
   res.redirect('/');
 });
-
 router.get('/logout', async function (req, res, next) {
-  req.session.admin = false;
   req.session.message = "Logout Success!";
+  //await query(OnlineuserSQL.deleteUserbyName,[username]);
+  req.session.admin = false;
   req.session.user=  "";
   res.redirect('/');
 });

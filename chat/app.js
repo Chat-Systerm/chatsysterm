@@ -11,6 +11,7 @@ var Onlineuser1SQL = require('./db/onlineuser1.sql');
 var userSQL = require('./db/user.sql');
 var ChatHistorySQL = require('./db/chathistory.sql');
 const sd = require('silly-datetime');
+var iconv = require('iconv-lite');
 var urlencodedParser = bodyParser.urlencoded({
   extended: false
 });
@@ -105,13 +106,17 @@ io.on('connection', async function (socket) { //这里的参数socket对应每�
   });
   socket.on('history',async function(){
     var q = await query(Onlineuser1SQL.getUserbyID,[socket.id]);
+    //console.log(q);
     if(q.length != 0){
       var name = q[0].UserName;
       var allsend = await query(ChatHistorySQL.getUserbyName,[name]);
       var allrev = await query(ChatHistorySQL.getUserbyToName,[name]);
       var all = allsend.concat(allrev);
-      //console.log(allrev);
-      //TODO:未考虑别人发给name的信息；只考虑了name发给别人的信息
+      for(var i =0;i<all.length;i++){
+        var str = iconv.decode(all[i].message,'UTF-8');
+        all[i].message = str;
+        //console.log(str);
+      }
       socket.emit('findhis',all); 
     }
     else{

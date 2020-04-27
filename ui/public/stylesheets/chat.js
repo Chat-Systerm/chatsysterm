@@ -37,10 +37,10 @@ function find_chat_fri(str) {
     return q;   //找到则返回对应会话id，未找到返回0
 }
 socket.emit('friendadd');
-socket.on('friend',function(data){
-   seleadd(data);
-   listadd(data);
-   findhistory(data);
+socket.on('friend', function (data) {
+    seleadd(data);
+    listadd(data);
+    findhistory(data);
 });
 //选中好友开始聊天:主动发起聊天,每选中一次创建一个会话,但需判断该会话是否已存在
 function selefri() {
@@ -67,20 +67,20 @@ function selefri() {
         person.type = "none";
     };
 }
-function findhistory(fridata){
+function findhistory(fridata) {
     var sele = document.getElementById("historyfind");
-    for(var i =0;i<fridata.length;i++){
+    for (var i = 0; i < fridata.length; i++) {
         var op = document.createElement("option");
-        op.setAttribute("value",fridata[i].UserName);
+        op.setAttribute("value", fridata[i].UserName);
         op.innerHTML = fridata[i].UserName;
         sele.appendChild(op);
     }
 }
 function seleadd(fridata) {    //聊天选择栏
     var sele = document.getElementById("myselect");
-    for(var i =0;i<fridata.length;i++){
+    for (var i = 0; i < fridata.length; i++) {
         var op = document.createElement("option");
-        op.setAttribute("value",fridata[i].UserName);
+        op.setAttribute("value", fridata[i].UserName);
         op.innerHTML = fridata[i].UserName;
         sele.appendChild(op);
     }
@@ -88,7 +88,7 @@ function seleadd(fridata) {    //聊天选择栏
 function listadd(datafri) {        //好友列表
     var biaoqian = document.getElementById("listul");
     biaoqian.innerHTML = "";
-    for(var i=0;i<datafri.length;i++){
+    for (var i = 0; i < datafri.length; i++) {
         var li = document.createElement("li");
         li.innerHTML = datafri[i].UserName;
         biaoqian.appendChild(li);
@@ -137,7 +137,6 @@ function send_mess(n) {
         var mess = document.getElementById("textx" + n).value;
         var texx = chatfri[n - 1];
         person.toname = texx;       //根据会话id:n确定会话发送目标toname
-        //console.log(audio);
         if (mess != '') {
             addliri(mess, n);
             person.type = "text";
@@ -147,32 +146,25 @@ function send_mess(n) {
             img = document.getElementById("imgshow").src;
             person.message = img;
             addimgri(img, n);
-            document.getElementById("imgshow").removeAttribute("src");
-            document.getElementById("imgshow").style.display = "none";
         }
         if (person.type == "audio") {
             audio = document.getElementById("audshow").src;
             person.message = audio;
             addaudri(audio, n);
-            document.getElementById("audshow").removeAttribute("src");
-            document.getElementById("audshow").style.display = "none";
         }
         if (person.type == "video") {
             video = document.getElementById("vidshow").src;
             person.message = video;
             addvidri(video, n);
-            document.getElementById("vidshow").removeAttribute("src");
-            document.getElementById("vidshow").style.display = "none";
         }
-        console.log(person);
         socket.emit('sayto', person);
+        person.type = "none";
     }
     else {
         alert("请先选择聊天好友！");
     }
     document.getElementById("textx" + n).value = "";
     document.getElementById("fileinput" + n).value = "";
-    //socket.emit('history');
     send(); //每次发送消息后都申请查询聊天记录以更新chathistory数组
 }
 //辅助函数
@@ -217,6 +209,10 @@ function addchat(n) {
         var file = document.createElement("input");
         file.setAttribute("type", "file");
         file.setAttribute("id", "fileinput" + n);
+        var preview = document.createElement("button");
+        preview.setAttribute("id", "showModalBtn" + n);
+        preview.setAttribute("onclick", "show(" + n + ")");
+        preview.innerText = "预览";
         var tex = document.createElement("textarea");
         tex.setAttribute("class", "text");
         tex.setAttribute("id", "textx" + n);
@@ -227,6 +223,7 @@ function addchat(n) {
         but.setAttribute("onclick", "send_mess(" + n + ")");
         but.innerHTML = "发送";
         chatfoot.appendChild(file);
+        chatfoot.appendChild(preview);
         chatfoot.appendChild(tex);
         chatfoot.appendChild(but);
         chatbox.appendChild(chatwin);
@@ -266,9 +263,10 @@ function addimgri(imgsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgright");
-    var ppp = document.createElement("p");
+    var ppp = document.createElement("a");
     ppp.setAttribute("class", "msgcard");
-    ppp.innerHTML = "<图片>";
+    ppp.setAttribute("onclick", "show(" + id + ")");
+    ppp.innerHTML = "img,点击放大";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
 }
@@ -276,20 +274,22 @@ function addvidri(vidsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgright");
-    var ppp = document.createElement("p");
+    var ppp = document.createElement("a");
     ppp.setAttribute("class", "msgcard");
-    ppp.innerHTML = "<视频>";
+    ppp.setAttribute("onclick", "show(" + id + ")");
+    ppp.innerHTML = "video,点击放大";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
 }
 function addaudri(audsrc, id) {
-    console.log("audio");
+    //console.log("audio");
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgright");
-    var ppp = document.createElement("p");
+    var ppp = document.createElement("a");
     ppp.setAttribute("class", "msgcard");
-    ppp.innerHTML = "<音频>";
+    ppp.setAttribute("onclick", "show(" + id + ")");
+    ppp.innerHTML = "audio,点击放大";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
 }
@@ -306,14 +306,14 @@ function addlile(messages, id) {
         biaoqian.appendChild(li);
     }
 }
-
 function addimgle(imgsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgleft");
-    var ppp = document.createElement("p");
+    var ppp = document.createElement("a");
     ppp.setAttribute("class", "msgcard");
-    ppp.innerHTML = "<图片>";
+    ppp.setAttribute("onclick", "show(" + id + ")");
+    ppp.innerHTML = "img,点击放大";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
     imggshow(imgsrc);
@@ -323,9 +323,10 @@ function addvidle(vidsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgleft");
-    var ppp = document.createElement("p");
+    var ppp = document.createElement("a");
     ppp.setAttribute("class", "msgcard");
-    ppp.innerHTML = "<视频>";
+    ppp.setAttribute("onclick", "show(" + id + ")");
+    ppp.innerHTML = "video,点击放大";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
     videoshow(vidsrc);
@@ -335,12 +336,33 @@ function addaudle(audsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
     var li = document.createElement("li");
     li.setAttribute("class", "msgleft");
-    var ppp = document.createElement("p");
+    var ppp = document.createElement("a");
     ppp.setAttribute("class", "msgcard");
-    ppp.innerHTML = "<音频>";
+    ppp.setAttribute("onclick", "show(" + id + ")");
+    ppp.innerHTML = "audio,点击放大";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
     audioshow(audsrc);
+}
+//****************************图片、视频、音频的弹窗预览 */
+function show(id) {
+    var mask = document.getElementById("pageMask");
+    var modal = document.getElementById("ModalBody");
+    var closeBtn = document.getElementById("closeModalBtn");
+    modal.style.display = (modal.style.display == "block") ? "none" : "block";
+    closeBtn.style.display = (closeBtn.style.display == "block") ? "none" : "block";
+    mask.style.visibility = (mask.style.visibility == "visible") ? "hidden" : "visible";
+    closeBtn.onclick = function () {
+        modal.style.display = (modal.style.display == "block") ? "none" : "block";
+        closeBtn.style.display = (closeBtn.style.display == "block") ? "none" : "block";
+        mask.style.visibility = (mask.style.visibility == "visible") ? "hidden" : "visible";
+        document.getElementById("imgshow").removeAttribute("src");
+        document.getElementById("imgshow").style.display = "none";
+        document.getElementById("vidshow").removeAttribute("src");
+        document.getElementById("vidshow").style.display = "none";
+        document.getElementById("audshow").removeAttribute("src");
+        document.getElementById("audshow").style.display = "none";
+    }
 }
 
 //监听input标签
@@ -362,7 +384,6 @@ function readfile() {
     reader.onload = function (e) {
         //img的src属性或background的url属性，可以通过被赋值为图片网络地址或base64的方式显示图片
         var typee = this.result.substring(this.result.indexOf('/') + 1, this.result.indexOf(';'));
-        console.log('type:', typee);
         if ((typee == "png") || (typee == "img")) {
             imggshow(this.result);
             person.type = "img";
@@ -378,65 +399,132 @@ function readfile() {
         }
         else if ((typee == "pdf") || (typee == "txt") || (typee == "docx") || (typee == "doc") || (typee == "xlsx")) {
             //TODO:
+            alert("请传输img/png/mp3/mp4格式文件！");
+
         }
     }
 }
-function imggshow(src) {
-    imgshow.src = src;
+
+function imggshow(src) {        ///将最新src属性赋给相关标签
+    document.getElementById("imgshow").src = src;
     document.getElementById("imgshow").style.display = 'block';
     document.getElementById("vidshow").style.display = 'none';
     document.getElementById("audshow").style.display = 'none';
 }
 function videoshow(src) {
-    vidshow.src = src;
-    document.getElementById("imgshow").style.display = 'none';
+    document.getElementById("vidshow").src = src;
     document.getElementById("vidshow").style.display = 'block';
+    document.getElementById("imgshow").style.display = 'none';
     document.getElementById("audshow").style.display = 'none';
 }
 function audioshow(src) {
-    audshow.src = src;
-    document.getElementById("imgshow").style.display = 'none';
-    document.getElementById("vidshow").style.display = 'none';
+    document.getElementById("audshow").src = src;
     document.getElementById("audshow").style.display = 'block';
+    document.getElementById("vidshow").style.display = 'none';
+    document.getElementById("imgshow").style.display = 'none';
 }
+
 function logout() {
     socket.close();
     window.location.href = '/logout';
 }
+//********************************* 聊天记录查询**************************************
 var chathistory = new Array();  //聊天记录数组，通过用户发送history事件定时更新
-socket.on('findhis',function(data){
+socket.on('findhis', function (data) {
     chathistory = data;
-    //console.log(chathistory);
+    console.log(chathistory);
 });
-function send(){
+function send() {
     socket.emit('history');
 }
+window.onload = send;
 //选择查询和某人的聊天记录后触发事件
-function selechat(){
+function selechat() {
     send();
     var result = new Array();
     var sele = document.getElementById("historyfind");
     var index = sele.selectedIndex;
     var idname = myselect.options[index].text;
-    console.log('idname:',idname);
-    if(chathistory.length!=0){
-        for(var i =0;i<chathistory.length;i++){
-            if((chathistory[i].name == idname)||(chathistory[i].toname == idname)){
-                result.push(chathistory[i]);
+    console.log('idname:', idname);
+    if (chathistory.length != 0) {
+        for (var i = 0; i < chathistory.length; i++) {
+            if ((chathistory[i].name == idname) || (chathistory[i].toname == idname)) {
+                var one ={
+                    "time":chathistory[i].Time,
+                    "name":chathistory[i].name,
+                    "toname":chathistory[i].toname,
+                    "mess":chathistory[i].message,
+                    "type":chathistory[i].type,
+                };
+                result.push(one);
             }
         }
-        if(result.length ==0){
+        if (result.length == 0) {
             alert("未找到相关记录！");
         }
-        else{
-            for(var j =0;j<result.length;j++){
-
-                alert(result[j].name);
+        else {
+            //console.log("result:", result);
+            var table = document.getElementById("table-1");
+            var tb = document.createElement("tbody");
+                tb.setAttribute("id","sbsb");
+            for (var i = 0; i < result.length; i++) {
+                var tr1 = document.createElement("tr");
+                var th1 = document.createElement("th");
+                th1.innerText =result[i].time;
+                var th2 = document.createElement("th");
+                th2.innerText = result[i].name;
+                var th3 = document.createElement("th");
+                th3.innerText = result[i].toname;
+                var th4 = document.createElement("th");
+                if(result[i].type == "text"){
+                    th4.innerText =result[i].mess;
+                }
+                else if(result[i].type == "img"){
+                    var im = document.createElement("img");
+                    im.setAttribute("src",result[i].mess);
+                    im.setAttribute("height","50");
+                    im.setAttribute("width","100");
+                    th4.appendChild(im);
+                }
+                else if(result[i].type == "video"){
+                    var vi = document.createElement("video");
+                    vi.setAttribute("src",result[i].mess);
+                    vi.setAttribute("height","50");
+                    vi.setAttribute("width","100");
+                    th4.appendChild(vi);
+                }
+                else if(result[i].type == "audio"){
+                    /*var aud = document.createElement("audio");
+                    aud.setAttribute("src",result[i].mess);
+                    aud.setAttribute("height","50");
+                    aud.setAttribute("width","100");
+                    th4.appendChild(aud);*/
+                    th4.innerText = "<音频>";
+                }
+                tr1.appendChild(th1);
+                tr1.appendChild(th2);
+                tr1.appendChild(th3);
+                tr1.appendChild(th4);
+                tb.appendChild(tr1);
+            }
+            table.appendChild(tb);
+            var mask = document.getElementById("pageMask");
+            var modal = document.getElementById("ModalBody2");
+            var closeBtn = document.getElementById("closeModalBtn2");
+            modal.style.display = (modal.style.display == "block") ? "none" : "block";
+            closeBtn.style.display = (closeBtn.style.display == "block") ? "none" : "block";
+            mask.style.visibility = (mask.style.visibility == "visible") ? "hidden" : "visible";
+            closeBtn.onclick = function () {
+                modal.style.display = (modal.style.display == "block") ? "none" : "block";
+                closeBtn.style.display = (closeBtn.style.display == "block") ? "none" : "block";
+                mask.style.visibility = (mask.style.visibility == "visible") ? "hidden" : "visible";
+                var tab = document.getElementById("sbsb");
+                tab.parentNode.removeChild(tab);
             }
         }
-            
+
     }
-    else{
+    else {
         alert("未找到相关记录！");
     }
 }

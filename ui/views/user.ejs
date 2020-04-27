@@ -11,20 +11,15 @@
 
 <body class="box">
     <div class="containerr">
+        <div id="pageMask"></div>
+        <!--遮盖层-->
         <h1 id="sess_name"><%= user_name%></h1>
         <p id="chatserver"><%= chat_server%></p>
         <button class="sendbtn" onclick="logout()">退出</button>
         <select id="historyfind" class="sendbtn" onchange="selechat()">
             <option>查询聊天记录</option>
         </select>
-        <div class="chatpre">
-            <img id="imgshow">
-            <audio id="audshow" controls="controls"></audio>
-            <video id="vidshow" controls="controls"></video>
-            <a id="fileshow"></a>
-        </div>
         <div class="chatbox" id="chatbox">
-            <!--TODO:好友列表-->
             <div class="chatleft">
                 <div class="top">
                     <div class="select">
@@ -45,16 +40,47 @@
                 </div>
                 <div class="center">
                     <ul class="ull" id="ulll1">
-                        <!--TODO:聊天记录通过增加Li标签-->
                     </ul>
                 </div>
                 <div class="footer">
                     <input type="file" id="fileinput1" />
+                    <button id="showModalBtn1" onclick="show(1)">预览</button>
                     <textarea class="text" id="textx1" placeholder="请在此输入要发送的内容..."></textarea>
                     <button class="sendbtn" id="sendbtn1" onclick="send_mess(1)">发送</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="ModalBody">
+        <!--模态框-->
+        <span id="closeModalBtn" class="close" title="Close Modal" style="display: none;">&times;</span>
+        <div id="video">
+            <video id="vidshow" controls>
+        </div>
+        <div id="img">
+            <img id="imgshow">
+        </div>
+        <div id="audio">
+            <audio id="audshow" controls>
+        </div>
+    </div>
+    <div id="ModalBody2">
+        <!--模态框-->
+        <span id="closeModalBtn2" class="close" title="Close Modal" style="display: none;">&times;</span>
+        <table id = "table-1" border="4" width="30%" cellspacing="0" cellpadding="10" align="center">
+            <caption>
+                聊天记录查询
+            </caption>
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>发送者</th>
+                    <th>接收者</th>
+                    <th>内容</th>
+                </tr>
+            </thead>
+        </table>
     </div>
 </body>
 

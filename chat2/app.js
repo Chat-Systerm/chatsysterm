@@ -13,6 +13,7 @@ var userSQL = require('./db/user.sql');
 const sd = require('silly-datetime');
 var app = express();
 var bodyParser = require('body-parser');
+var iconv = require('iconv-lite');
 var urlencodedParser = bodyParser.urlencoded({
   extended: false
 });
@@ -85,11 +86,17 @@ io.on('connection', function (socket) { //这里的参数socket对应每个客�
   });
   socket.on('history',async function(){
     var q = await query(Onlineuser2SQL.getUserbyID,[socket.id]);
+    console.log(q);
     if(q.length != 0){
       var name = q[0].UserName;
       var allsend = await query(ChatHistorySQL.getUserbyName,[name]);
       var allrev = await query(ChatHistorySQL.getUserbyToName,[name]);
       var all = allsend.concat(allrev);
+      for(var i =0;i<all.length;i++){
+        var str = iconv.decode(all[i].message,'UTF-8');   //将message从Array Buffer缓冲区读出为字符串
+        all[i].message = str;
+        //console.log(str);
+      }
       socket.emit('findhis',all); 
     }
     else{

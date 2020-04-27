@@ -1,4 +1,4 @@
-create table onlineuser
+create table onlineuser3
 (
     UserName varchar(255)  not null comment '用户名',
     SocketID varchar(255)  not null comment '用户ID',
