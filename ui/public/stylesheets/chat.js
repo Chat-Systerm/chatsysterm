@@ -1,4 +1,5 @@
 //此用户的json对象
+<<<<<<< HEAD
 ///////////////////////////////////////////////////
 var toname = new Array();
 var target = new Array();
@@ -39,6 +40,19 @@ var person = {
 person.name = document.getElementById("sess_name").innerHTML;
 person.chat_server = document.getElementById("chatserver").innerHTML;
 console.log(person.name);
+=======
+var person = {
+    "name": "none",
+    "socketid": "none",
+    "toname": "none",
+    "chat_server": 0,
+    "message": "none",
+    "type": "none"
+};
+person.name = document.getElementById("sess_name").innerHTML;
+person.chat_server = document.getElementById("chatserver").innerHTML;
+//console.log(person);
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
 //第一次连接服务器,暴露了一个io的全局变量，默认连接到提供当前页面的主机
 if (person.chat_server == 1) {
     var socket = io.connect('http://localhost:3001');
@@ -65,12 +79,17 @@ function find_chat_fri(str) {
     }
     return q;   //找到则返回对应会话id，未找到返回0
 }
+<<<<<<< HEAD
 socket.emit('friendadd',person);
+=======
+socket.emit('friendadd');
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
 socket.on('friend', function (data) {
     seleadd(data);
     listadd(data);
     findhistory(data);
 });
+<<<<<<< HEAD
 socket.on('friend2', function (data) {
     seleadd(data);
     findhistory(data);
@@ -192,6 +211,14 @@ function selefri() {
             }
         }
         if(number==0){
+=======
+//选中好友开始聊天:主动发起聊天,每选中一次创建一个会话,但需判断该会话是否已存在
+function selefri() {
+    var sele = document.getElementById("myselect");
+    var index = sele.selectedIndex;
+    var idname = myselect.options[index].text;
+    if (idname != "请选择聊天好友") {
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
         //遍历该用户所有聊天会话chatfri，查找是否该会话已存在
         var id = find_chat_fri(idname);
         console.log(idname, id);
@@ -205,6 +232,7 @@ function selefri() {
                 chatfri.push(idname);
                 id = num;
             }
+<<<<<<< HEAD
             addchat(id);
         }
         //console.log(chatfri);
@@ -354,6 +382,52 @@ socket.on('chat message', function (data) {
         var deleid = find_chat_fri(toname);
         delechat(deleid);
         alert(data.b.message);
+=======
+            addchat(id, idname);
+        }
+        //console.log(chatfri);
+        person.type = "none";
+    };
+}
+function findhistory(fridata) {
+    var sele = document.getElementById("historyfind");
+    for (var i = 0; i < fridata.length; i++) {
+        var op = document.createElement("option");
+        op.setAttribute("value", fridata[i].UserName);
+        op.innerHTML = fridata[i].UserName;
+        sele.appendChild(op);
+    }
+}
+function seleadd(fridata) {    //聊天选择栏
+    var sele = document.getElementById("myselect");
+    for (var i = 0; i < fridata.length; i++) {
+        var op = document.createElement("option");
+        op.setAttribute("value", fridata[i].UserName);
+        op.innerHTML = fridata[i].UserName;
+        sele.appendChild(op);
+    }
+}
+function listadd(datafri) {        //好友列表
+    var biaoqian = document.getElementById("listul");
+    biaoqian.innerHTML = "";
+    for (var i = 0; i < datafri.length; i++) {
+        var li = document.createElement("li");
+        li.innerHTML = datafri[i].UserName;
+        biaoqian.appendChild(li);
+    }
+}
+//随时监听任何人发来的聊天信息：被动接收新会话/接收已存在会话的消息
+socket.on('chat message', function (data) {
+    console.log(data);
+    var idname = data.name;   //遍历该用户聊天会话，查找是否该会话已存在
+    var id = find_chat_fri(idname);
+    if (idname == "server") {   //接收服务器发来的消息
+        id = -1;
+        var toname = data.toname;
+        var deleid = find_chat_fri(toname);
+        delechat(deleid);
+        alert(data.message);
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
     }
     if (id == 0) {  //未找到该会话，增加新会话
         if (chatfri[0] == "deleted") {  //若会话1被删除，则新增的会话填充会话1 
@@ -365,6 +439,7 @@ socket.on('chat message', function (data) {
             chatfri.push(idname);
             id = num;
         }
+<<<<<<< HEAD
         person.target[id]=1;
         addchat(id);
     }
@@ -414,6 +489,29 @@ function send_mess(n) {
         var mess = document.getElementById("textx" + n).value;
         var texx = chatfri[n - 1];
         person.toname[n] = texx;       //根据会话id:n确定会话发送目标toname
+=======
+        addchat(id);
+    }
+    if (data.type == "text") {
+        addlile(data.message, id);
+    }
+    else if (data.type == "img") {
+        addimgle(data.message, id);
+    }
+    else if (data.type == "video") {
+        addvidle(data.message, id);
+    }
+    else if (data.type == "audio") {
+        addaudle(data.message, id);
+    }
+});
+//发送消息函数,n为对应的会话id
+function send_mess(n) {
+    if ((chatfri[n - 1]) && (chatfri[n - 1] != "deleted")) {
+        var mess = document.getElementById("textx" + n).value;
+        var texx = chatfri[n - 1];
+        person.toname = texx;       //根据会话id:n确定会话发送目标toname
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
         if (mess != '') {
             addliri(mess, n);
             person.type = "text";
@@ -434,7 +532,10 @@ function send_mess(n) {
             person.message = video;
             addvidri(video, n);
         }
+<<<<<<< HEAD
         socket.emit('sname',n);
+=======
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
         socket.emit('sayto', person);
         person.type = "none";
     }
@@ -443,6 +544,7 @@ function send_mess(n) {
     }
     document.getElementById("textx" + n).value = "";
     document.getElementById("fileinput" + n).value = "";
+<<<<<<< HEAD
 }
 else if(person.target[n]==2){
     if ((chatfri[n-1])&&(chatfri[n-1] != "deleted")) {  
@@ -536,6 +638,10 @@ socket.on('dadd',function(data){//被动添加数组
       }
   }
 });
+=======
+    send(); //每次发送消息后都申请查询聊天记录以更新chathistory数组
+}
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
 //辅助函数
 function addchat(n) {
     if (n == 1) {
@@ -544,7 +650,10 @@ function addchat(n) {
         var close = document.getElementById("close1");
         close.innerHTML = "&times";
         readFile(1);
+<<<<<<< HEAD
       
+=======
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
     }
     else {
         var chatbox = document.getElementById("chatbox");
@@ -699,9 +808,14 @@ function addvidle(vidsrc, id) {
     ppp.innerHTML = "video,点击放大";
     li.appendChild(ppp);
     biaoqian.appendChild(li);
+<<<<<<< HEAD
     console.log("视频2执行");
     videoshow(vidsrc);
     console.log("视频3执行");
+=======
+    videoshow(vidsrc);
+
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
 }
 function addaudle(audsrc, id) {
     var biaoqian = document.getElementById("ulll" + id);
@@ -740,16 +854,25 @@ function show(id) {
 function readFile(n) {
     var input = document.getElementById("fileinput" + n);
     if (typeof (FileReader) === 'undefined') {
+<<<<<<< HEAD
         console.log(typeof (FileReader));
+=======
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
         result.innerHTML = "抱歉，你的浏览器不支持 FileReader，请使用现代浏览器操作！";
         input.setAttribute('disabled', 'disabled');
     } else {
         input.addEventListener('change', readfile, false);
+<<<<<<< HEAD
 
     }
 }
 function readfile() {
  
+=======
+    }
+}
+function readfile() {
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
     var file = this.files[0];
     //readAsDataURL方法会读取指定的 Blob 或 File 对象。
     //读取操作完成的时候,result 属性将包含一个data:URL格式的字符串（base64编码）以表示所读取文件的内容
@@ -758,8 +881,12 @@ function readfile() {
     reader.onload = function (e) {
         //img的src属性或background的url属性，可以通过被赋值为图片网络地址或base64的方式显示图片
         var typee = this.result.substring(this.result.indexOf('/') + 1, this.result.indexOf(';'));
+<<<<<<< HEAD
         console.log(typee);
         if ((typee == "png") || (typee == "img")|| (typee == "jpeg")) {
+=======
+        if ((typee == "png") || (typee == "img")) {
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
             imggshow(this.result);
             person.type = "img";
         }
@@ -774,7 +901,11 @@ function readfile() {
         }
         else if ((typee == "pdf") || (typee == "txt") || (typee == "docx") || (typee == "doc") || (typee == "xlsx")) {
             //TODO:
+<<<<<<< HEAD
             alert("请传输img/png/jpg/mp3/mp4格式文件！");
+=======
+            alert("请传输img/png/mp3/mp4格式文件！");
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
 
         }
     }
@@ -812,12 +943,19 @@ socket.on('findhis', function (data) {
 function send() {
     socket.emit('history');
 }
+<<<<<<< HEAD
 socket.emit('history');
 //window.onload = send;//////////////////此代码和我的代码冲突
 //选择查询和某人的聊天记录后触发事件
 function selechat() {
     //send();
     socket.emit('history');
+=======
+window.onload = send;
+//选择查询和某人的聊天记录后触发事件
+function selechat() {
+    send();
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
     var result = new Array();
     var sele = document.getElementById("historyfind");
     var index = sele.selectedIndex;

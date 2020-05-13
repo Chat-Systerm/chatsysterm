@@ -3,12 +3,19 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+<<<<<<< HEAD
 var indexRouter = require('./routes/index');
 var query = require('./db/db.config');
 var OnlineuserSQL = require('./db/onlineuser.sql');
 var Onlineuser1SQL = require('./db/onlineuser1.sql');
 var DoubleSQL = require('./db/doubleuse.sql');
 var DuserSQL = require('./db/duser.sql');
+=======
+
+var indexRouter = require('./routes/index');
+var query = require('./db/db.config');
+var OnlineuserSQL = require('./db/onlineuser.sql');
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
 var Onlineuser2SQL = require('./db/onlineuser2.sql');
 var ChatHistorySQL = require('./db/chathistory.sql');
 var userSQL = require('./db/user.sql');
@@ -19,6 +26,7 @@ var iconv = require('iconv-lite');
 var urlencodedParser = bodyParser.urlencoded({
   extended: false
 });
+<<<<<<< HEAD
 ////////////////////////////////////////////////////////////////
 /*var user ={
   name:"0",
@@ -29,6 +37,8 @@ for(var i=0;i<100;i++){
    users[i]=user;
 }*/
 //////////////////////////////////////////////
+=======
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
 //***********************************udp套接字连接两个服务器,实现两个服务器之间的文字传递
 var udp = require('dgram');
 var clientSocket = udp.createSocket('udp4');
@@ -36,6 +46,7 @@ var clientSocket = udp.createSocket('udp4');
 clientSocket.on('message', async function (msg, rinfo) {
   //console.log('recv %s of %d bytes from chat_server1 %s:%d\n', msg, msg.length, rinfo.address, rinfo.port);
   var mes = JSON.parse(msg);
+<<<<<<< HEAD
   console.log(mes.a);
   if(mes.a==1){//服务器1有新用户注册登录
     var all2 = await query(Onlineuser2SQL.queryAll);
@@ -61,11 +72,17 @@ clientSocket.on('message', async function (msg, rinfo) {
   }
   if(mes.a==0) {//原本单聊的部分
   var tagname = mes.c;
+=======
+  var tagname = mes.toname;
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
   let target = await query(Onlineuser2SQL.getUserbyName, [tagname]);
   var tagid = target[0].SocketID;
   var tosocket = socket_send(tagid);
   tosocket.emit('chat message', mes);
+<<<<<<< HEAD
   }
+=======
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
 });
 clientSocket.on('error', function (err) {
   console.log('error, msg - %s, stack - %s\n', err.message, err.stack);
@@ -84,12 +101,17 @@ client.on('data', async function (data) {
   if (chatserver1_message.substr(chatserver1_message.length - 1, 1) == '}') {  //接收结束
     //console.log(chatserver1_message);
     var mes = JSON.parse(chatserver1_message);
+<<<<<<< HEAD
     if(mes.a==0){
     var tagname = mes.c;
+=======
+    var tagname = mes.toname;
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
     let target = await query(Onlineuser2SQL.getUserbyName, [tagname]);
     var tagid = target[0].SocketID;
     var tosocket = socket_send(tagid);
     tosocket.emit('chat message', mes);
+<<<<<<< HEAD
     }
     if(mes.a==3){
       var tagname = mes.b;
@@ -98,6 +120,8 @@ client.on('data', async function (data) {
       var tosocket = socket_send(tagid);
       tosocket.emit('dchat message', mes.c); 
     }
+=======
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
     chatserver1_message = ""; //每转发完一次都清空全局变量chatserver1_mseeage
   }
 });
@@ -126,6 +150,7 @@ io.on('connection', function (socket) { //这里的参数socket对应每个客�
     }
     await query(Onlineuser2SQL.insert,[username,socketid]);
   });
+<<<<<<< HEAD
   socket.on('friendadd',async function(data){
     var dnum=0;
     var allfriend = await query(userSQL.queryAll);
@@ -164,6 +189,11 @@ io.on('connection', function (socket) { //这里的参数socket对应每个客�
     }
     var strdata = JSON.stringify(abc);
     clientSocket.send(strdata, 8061, "localhost");*/
+=======
+  socket.on('friendadd',async function(){
+    var allfriend = await query(userSQL.queryAll);
+    socket.emit('friend',allfriend);
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
   });
   socket.on('history',async function(){
     var q = await query(Onlineuser2SQL.getUserbyID,[socket.id]);
@@ -184,6 +214,7 @@ io.on('connection', function (socket) { //这里的参数socket对应每个客�
       socket.emit('findhis',"null");
     }
   });
+<<<<<<< HEAD
   ///////////////////////////////////////////////////////////////////////////
 socket.on('start',async function(){
   var allfriend = await query(userSQL.queryAll); 
@@ -197,10 +228,16 @@ socket.on ('sname',function(data){
   socket.on('sayto', async function (data) {
     //console.log(data);
     var toname = data.toname[sname];
+=======
+  socket.on('sayto', async function (data) {
+    //console.log(data);
+    var toname = data.toname;
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
     var type = data.type;
     //查询数据库登录表，查看目标用户是否在线
     var online = await query(OnlineuserSQL.getUserbyName,[toname]);
     var updatetimes = sd.format(new Date(), 'YYYY-MM-DD HH:mm:ss');
+<<<<<<< HEAD
     await query(ChatHistorySQL.insert, [updatetimes,data.name,data.toname[sname],data.message,data.type]);
     if(online.length == 0){
       var b={
@@ -220,12 +257,24 @@ socket.on ('sname',function(data){
         b:data,
         c:toname
       }
+=======
+    await query(ChatHistorySQL.insert, [updatetimes,data.name,data.toname,data.message,data.type]);
+    if(online.length == 0){
+      socket.emit('chat message', { "message": "该用户不在线，请稍后再试！", "name": "server", "toname": toname });
+      await query(ChatHistorySQL.insert, [updatetimes,"server",data.name,"该用户不在线，请稍后再试！","text"]);
+    }
+    else{
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
       //判读目标用户是否在此服务器，在线返回其socketid，不在则返回0
       let target = await query(Onlineuser2SQL.getUserbyName, [toname]);
       //目的用户不在此服务器，则采取二者服务器之间的udp/tcp通道发送数据给chat_server1
       if (target.length == 0) {
+<<<<<<< HEAD
 
         var strdata = JSON.stringify(abc);
+=======
+        var strdata = JSON.stringify(data);
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
         if (type == "text") { //文本消息采用udp传输
           clientSocket.send(strdata, 8061, "localhost");
         }
@@ -241,6 +290,7 @@ socket.on ('sname',function(data){
         toid = target[0].SocketID;
         var toSocket = socket_send(toid);
         if (type != "none") {
+<<<<<<< HEAD
           var s ={
             a:0,
             b:data,
@@ -248,10 +298,14 @@ socket.on ('sname',function(data){
           }
           console.log(s.b.name);
           toSocket.emit('chat message', s);
+=======
+          toSocket.emit('chat message', data);
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
         }
       }
     }
   });
+<<<<<<< HEAD
   ///////////////////////////////////////////////////////////
   var dname = 0;//单聊单独传过来一个数据为了联系。
   socket.on ('dname',function(data){
@@ -394,6 +448,9 @@ socket.on ('sname',function(data){
     }
     socket.emit('dperson',user);
   });
+=======
+  //每个 socket 还会触发一个特殊的 disconnect 事件
+>>>>>>> 1f0a5e614ecd447faedf452369a05c5a7261b153
   socket.on('disconnect', function () {
     totalonline2--;
     var logoutuserid = socket.id;
