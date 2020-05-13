@@ -7,6 +7,7 @@ var logger = require('morgan');
 var session = require('express-session');
 var indexRouter = require('./routes/index');
 var dataRouter = require('./routes/data');
+<<<<<<< HEAD
 var query = require('./db/db.config');
 var OnlineuserSQL = require('./db/onlineuser.sql');
 var userSQL = require('./db/user.sql');
@@ -40,6 +41,10 @@ io.on('connection',function (socket) {
     await query(OnlineuserSQL.deleteUserbyName,[username]); 
   });
 });
+=======
+var app = express();
+
+>>>>>>> f2dfefb0a3e6a34cf9bf155f1bb6c1c5d90609c3
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

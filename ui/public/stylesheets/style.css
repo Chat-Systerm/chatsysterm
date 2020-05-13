@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+
+/*TODO:login view design*/
+>>>>>>> f2dfefb0a3e6a34cf9bf155f1bb6c1c5d90609c3
 input[type=text], input[type=password] {
     width: auto;
     padding: 12px 20px;
@@ -97,6 +102,7 @@ input[type=text], input[type=password] {
        display: block;
       float: none;
     }
+<<<<<<< HEAD
   }
   body {
     padding: 50px;
@@ -145,3 +151,6 @@ input[type=text], input[type=password] {
   .but:hover{
     background: #268DFF;
   }
+=======
+  }
+>>>>>>> f2dfefb0a3e6a34cf9bf155f1bb6c1c5d90609c3
